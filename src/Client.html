@@ -326,6 +326,11 @@
         actions.appendChild(createLinkButton('Отправить запрос через MAX', maxUrl, 'button button-secondary'));
       }
 
+      var copyHelp = document.createElement('p');
+      copyHelp.className = 'copy-help';
+      copyHelp.textContent = 'Кнопка копирует готовое сообщение с названием, кодом, ценой и ссылкой на товар. Затем откройте чат с продавцом в Telegram, MAX или другом мессенджере и вставьте текст.';
+      actions.appendChild(copyHelp);
+
       var copyButton = document.createElement('button');
       copyButton.type = 'button';
       copyButton.className = 'button button-quiet button-wide';
@@ -401,7 +406,7 @@
       var feedback = actions.querySelector('.copy-feedback');
       if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
         navigator.clipboard.writeText(message).then(function () {
-          feedback.textContent = 'Текст запроса скопирован.';
+          feedback.textContent = 'Текст скопирован. Вставьте его в чат с продавцом и отправьте.';
         }).catch(function () {
           showCopyPrompt(message, feedback);
         });
@@ -412,7 +417,7 @@
 
     function showCopyPrompt(message, feedback) {
       window.prompt('Скопируйте текст запроса:', message);
-      feedback.textContent = 'Открылось окно с текстом запроса для ручного копирования.';
+      feedback.textContent = 'Окно с текстом открыто. Скопируйте его, затем вставьте в чат с продавцом и отправьте.';
     }
 
     function normalizeText(value) {
