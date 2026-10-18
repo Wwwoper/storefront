@@ -6,6 +6,7 @@
       products: [],
       categories: [],
       settings: {},
+      requestedProductId: String(window.STOREFRONT_REQUESTED_PRODUCT_ID || ''),
       loaded: false
     };
 
@@ -18,8 +19,9 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       [
-        'store-title', 'store-description', 'search-input', 'category-filter',
-        'reset-filters', 'results-count', 'updated-at', 'loading-state',
+        'store-title', 'store-description', 'catalog-tools', 'requested-product-mode',
+        'search-input', 'category-filter', 'reset-filters', 'show-all-products',
+        'results-count', 'updated-at', 'loading-state',
         'error-state', 'error-message', 'retry-button', 'empty-state',
         'empty-title', 'empty-message', 'empty-reset-button', 'product-grid',
         'seller-contact-note', 'delivery-note'
@@ -59,6 +61,7 @@
           state.settings = response.settings || {};
           state.loaded = true;
           applySettings();
+          updateProductViewMode();
           fillCategories();
           setVisible(elements['loading-state'], false);
           setVisible(elements['error-state'], false);
@@ -110,7 +113,8 @@
         var text = normalizeText([product.title, product.description, product.category, product.sizeOrVariant, product.condition].join(' '));
         var matchesText = !query || text.indexOf(query) !== -1;
         var matchesCategory = !selectedCategory || product.category === selectedCategory;
-        return matchesText && matchesCategory;
+        var matchesRequestedProduct = !state.requestedProductId || product.id === state.requestedProductId;
+        return matchesText && matchesCategory && matchesRequestedProduct;
       });
 
       elements['product-grid'].replaceChildren();
@@ -121,10 +125,15 @@
 
       if (products.length === 0) {
         var hasFilters = Boolean(query || selectedCategory);
-        elements['empty-title'].textContent = hasFilters ? 'Ничего не найдено' : 'Пока нет опубликованных товаров';
-        elements['empty-message'].textContent = hasFilters
-          ? 'Попробуйте изменить запрос или выбрать другую категорию.'
-          : 'Новые товары появятся здесь после публикации продавцом.';
+        if (state.requestedProductId) {
+          elements['empty-title'].textContent = 'Товар по ссылке не найден';
+          elements['empty-message'].textContent = 'Возможно, товар снят с публикации или ссылка устарела. Откройте весь каталог, чтобы продолжить поиск.';
+        } else {
+          elements['empty-title'].textContent = hasFilters ? 'Ничего не найдено' : 'Пока нет опубликованных товаров';
+          elements['empty-message'].textContent = hasFilters
+            ? 'Попробуйте изменить запрос или выбрать другую категорию.'
+            : 'Новые товары появятся здесь после публикации продавцом.';
+        }
         setVisible(elements['empty-state'], true);
         setVisible(elements['product-grid'], false);
       } else {
@@ -269,7 +278,8 @@
       var baseUrl = window.STOREFRONT_WEB_APP_URL;
       if (!baseUrl) return '';
       var url = new URL(baseUrl);
-      url.hash = product.id;
+      url.searchParams.set('product', product.id);
+      url.hash = '';
       return url.toString();
     }
 
@@ -313,9 +323,17 @@
       return String(value || '').toLocaleLowerCase('ru-RU').replace(/ё/g, 'е').trim();
     }
 
+    function updateProductViewMode() {
+      var isProductView = Boolean(state.requestedProductId);
+      setVisible(elements['catalog-tools'], !isProductView);
+      setVisible(elements['requested-product-mode'], isProductView);
+    }
+
     function resetFilters() {
       elements['search-input'].value = '';
       elements['category-filter'].value = '';
+      state.requestedProductId = '';
+      updateProductViewMode();
       renderProducts();
     }
 
@@ -345,14 +363,8 @@
     }
 
     function scrollToRequestedProduct() {
-      var hash = window.location.hash.replace(/^#/, '');
-      if (!hash) return;
-      var productId;
-      try {
-        productId = decodeURIComponent(hash);
-      } catch (error) {
-        return;
-      }
+      var productId = state.requestedProductId;
+      if (!productId) return;
       var target = document.getElementById('product-' + productId);
       if (target) {
         target.classList.add('is-targeted');

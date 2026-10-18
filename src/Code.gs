@@ -1,9 +1,15 @@
 /** Serves the public storefront. The endpoint is read-only. */
-function doGet() {
+function doGet(e) {
   var template = HtmlService.createTemplateFromFile('Index');
   // Use the canonical deployed URL for product links. The browser's location
   // may point to Apps Script's userCodeAppPanel iframe instead of the /exec URL.
   template.webAppUrl = ScriptApp.getService().getUrl() || '';
+  // Query parameters are read server-side because URL fragments may not be
+  // available inside the HTML Service iframe. Product IDs use a safe allowlist.
+  var requestedProductId = e && e.parameter ? String(e.parameter.product || '') : '';
+  template.requestedProductId = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(requestedProductId)
+    ? requestedProductId
+    : '';
   return template.evaluate()
     .setTitle('Моя витрина')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')

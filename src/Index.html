@@ -18,7 +18,12 @@
       </header>
 
       <main id="main-content">
-        <section class="catalog-tools" aria-label="Поиск товаров">
+        <section id="requested-product-mode" class="requested-product-mode" hidden>
+          <p>Открыт товар по ссылке из сообщения.</p>
+          <a id="show-all-products" class="button button-quiet" href="<?= webAppUrl ?>">Показать весь каталог</a>
+        </section>
+
+        <section id="catalog-tools" class="catalog-tools" aria-label="Поиск товаров">
           <label class="search-field" for="search-input">
             <span class="visually-hidden">Поиск по названию и описанию</span>
             <span class="search-icon" aria-hidden="true">⌕</span>
@@ -72,6 +77,7 @@
     <script>
       // Render the public /exec URL server-side; don't use the sandbox iframe URL.
       window.STOREFRONT_WEB_APP_URL = <?!= JSON.stringify(webAppUrl) ?>;
+      window.STOREFRONT_REQUESTED_PRODUCT_ID = <?!= JSON.stringify(requestedProductId) ?>;
     </script>
     <?!= include_('Client'); ?>
   </body>
