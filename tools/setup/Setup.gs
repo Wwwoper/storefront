@@ -47,7 +47,7 @@ function setupCatalogTemplate() {
   setupConfigureSheet_(products, PRODUCT_HEADERS_.length);
   setupConfigureSheet_(reference, 1);
   setupConfigureSheet_(settings, 2);
-  setupConfigureProductValidation_(products, reference);
+  setupConfigureProductValidation_(products, reference, spreadsheet);
 
   return {
     ok: true,
@@ -97,7 +97,30 @@ function setupConfigureSheet_(sheet, columnCount) {
   }
 }
 
-function setupConfigureProductValidation_(products, reference) {
+function setupFormulaArgumentSeparator_(spreadsheet) {
+  var locale = 'en-US';
+  if (spreadsheet && typeof spreadsheet.getSpreadsheetLocale === 'function') {
+    locale = String(spreadsheet.getSpreadsheetLocale() || locale).replace(/_/g, '-');
+  }
+
+  // Google Sheets uses semicolons as formula argument separators when the
+  // spreadsheet locale uses a comma as its decimal separator (for example ru_RU).
+  try {
+    return new Intl.NumberFormat(locale).format(1.1).indexOf(',') !== -1 ? ';' : ',';
+  } catch (error) {
+    // Fallback for uncommon runtimes/locales where Intl locale data is missing.
+    return /^(ru|de|fr|es|it|pt|nl|pl|uk|tr|sv|no|da|fi|cs|sk|hu|hr|ro|bg|el|lt|lv|et|sl|sr|is|id|vi)(-|$)/i.test(locale)
+      ? ';'
+      : ',';
+  }
+}
+
+function setupFormulaForSpreadsheet_(spreadsheet, formula) {
+  var separator = setupFormulaArgumentSeparator_(spreadsheet);
+  return String(formula).replace(/,/g, separator);
+}
+
+function setupConfigureProductValidation_(products, reference, spreadsheet) {
   var rowCount = Math.max(1, products.getMaxRows() - 1);
   var statusRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(['Черновик', 'В наличии', 'Зарезервирован', 'Продан', 'Скрыт'], true)
@@ -122,21 +145,21 @@ function setupConfigureProductValidation_(products, reference) {
   products.getRange(2, 5, rowCount, 1).setDataValidation(priceRule);
 
   var quantityRule = SpreadsheetApp.newDataValidation()
-    .requireFormulaSatisfied('=OR(F2="",AND(ISNUMBER(F2),F2>=0,MOD(F2,1)=0))')
+    .requireFormulaSatisfied(setupFormulaForSpreadsheet_(spreadsheet, '=OR(F2="",AND(ISNUMBER(F2),F2>=0,MOD(F2,1)=0))'))
     .setAllowInvalid(false)
     .setHelpText('Количество должно быть целым числом, равным нулю или больше.')
     .build();
   products.getRange(2, 6, rowCount, 1).setDataValidation(quantityRule);
 
   var productIdRule = SpreadsheetApp.newDataValidation()
-    .requireFormulaSatisfied('=OR(A2="",COUNTIF($A$2:$A,A2)=1)')
+    .requireFormulaSatisfied(setupFormulaForSpreadsheet_(spreadsheet, '=OR(A2="",COUNTIF($A$2:$A,A2)=1)'))
     .setAllowInvalid(false)
     .setHelpText('Код товара должен быть уникальным.')
     .build();
   products.getRange(2, 1, rowCount, 1).setDataValidation(productIdRule);
 
   var sortOrderRule = SpreadsheetApp.newDataValidation()
-    .requireFormulaSatisfied('=OR(M2="",AND(ISNUMBER(M2),MOD(M2,1)=0))')
+    .requireFormulaSatisfied(setupFormulaForSpreadsheet_(spreadsheet, '=OR(M2="",AND(ISNUMBER(M2),MOD(M2,1)=0))'))
     .setAllowInvalid(false)
     .setHelpText('Порядок сортировки должен быть целым числом.')
     .build();
@@ -144,7 +167,7 @@ function setupConfigureProductValidation_(products, reference) {
 
   var formattingRules = products.getConditionalFormatRules();
   var incompleteProductRule = SpreadsheetApp.newConditionalFormatRule()
-    .whenFormulaSatisfied('=AND($L2="В наличии",OR($A2="",$B2="",$C2="",$D2="",$E2="",$F2="",$I2=""))')
+    .whenFormulaSatisfied(setupFormulaForSpreadsheet_(spreadsheet, '=AND($L2="В наличии",OR($A2="",$B2="",$C2="",$D2="",$E2="",$F2="",$I2=""))'))
     .setBackground('#fce8e6')
     .setRanges([products.getRange(2, 1, rowCount, PRODUCT_HEADERS_.length)])
     .build();

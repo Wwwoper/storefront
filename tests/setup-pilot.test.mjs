@@ -147,3 +147,25 @@ test('публичная и служебная части не смешаны', 
   assert.equal(clientSource.includes('function addPilotSampleProducts'), false);
   assert.equal(clientSource.includes('function runPilotPreflight'), false);
 });
+
+test('строит формулы проверки данных с разделителем российской локали', async () => {
+  const { runtime } = await makeRuntime();
+  const formula = '=OR(F2="",AND(ISNUMBER(F2),F2>=0,MOD(F2,1)=0))';
+  const localized = runtime.setupFormulaForSpreadsheet_(
+    { getSpreadsheetLocale: () => 'ru_RU' },
+    formula
+  );
+
+  assert.equal(localized, '=OR(F2="";AND(ISNUMBER(F2);F2>=0;MOD(F2;1)=0))');
+});
+
+test('оставляет запятые для локали США', async () => {
+  const { runtime } = await makeRuntime();
+  const formula = '=OR(F2="",AND(ISNUMBER(F2),F2>=0,MOD(F2,1)=0))';
+  const localized = runtime.setupFormulaForSpreadsheet_(
+    { getSpreadsheetLocale: () => 'en_US' },
+    formula
+  );
+
+  assert.equal(localized, formula);
+});
