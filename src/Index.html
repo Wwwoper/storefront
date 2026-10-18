@@ -29,6 +29,15 @@
             <span class="search-icon" aria-hidden="true">⌕</span>
             <input id="search-input" type="search" placeholder="Найти товар…" autocomplete="off">
           </label>
+          <label class="status-field" for="status-filter">
+            <span class="visually-hidden">Наличие товара</span>
+            <select id="status-filter" aria-label="Фильтр по наличию" title="Показывать товары по наличию">
+              <option value="available" selected>В наличии</option>
+              <option value="reserved">Зарезервирован</option>
+              <option value="unavailable">Нет в наличии</option>
+              <option value="all">Все статусы</option>
+            </select>
+          </label>
           <label class="category-field" for="category-filter">
             <span class="visually-hidden">Категория товара</span>
             <select id="category-filter">

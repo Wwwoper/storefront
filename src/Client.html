@@ -20,7 +20,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       [
         'store-title', 'store-description', 'catalog-tools', 'requested-product-mode',
-        'search-input', 'category-filter', 'reset-filters', 'show-all-products',
+        'search-input', 'status-filter', 'category-filter', 'reset-filters', 'show-all-products',
         'results-count', 'updated-at', 'loading-state',
         'error-state', 'error-message', 'retry-button', 'empty-state',
         'empty-title', 'empty-message', 'empty-reset-button', 'product-grid',
@@ -30,6 +30,7 @@
       });
 
       elements['search-input'].addEventListener('input', renderProducts);
+      elements['status-filter'].addEventListener('change', renderProducts);
       elements['category-filter'].addEventListener('change', renderProducts);
       elements['reset-filters'].addEventListener('click', resetFilters);
       elements['empty-reset-button'].addEventListener('click', resetFilters);
@@ -109,12 +110,18 @@
 
       var query = normalizeText(elements['search-input'].value);
       var selectedCategory = elements['category-filter'].value;
+      var selectedStatus = elements['status-filter'].value || 'available';
       var products = state.products.filter(function (product) {
         var text = normalizeText([product.title, product.description, product.category, product.sizeOrVariant, product.condition].join(' '));
         var matchesText = !query || text.indexOf(query) !== -1;
         var matchesCategory = !selectedCategory || product.category === selectedCategory;
         var matchesRequestedProduct = !state.requestedProductId || product.id === state.requestedProductId;
-        return matchesText && matchesCategory && matchesRequestedProduct;
+        // A direct link must still open its product even when it is reserved or unavailable.
+        var matchesStatus = Boolean(state.requestedProductId) || selectedStatus === 'all' ||
+          (selectedStatus === 'available' && product.availabilityLabel === 'В наличии') ||
+          (selectedStatus === 'reserved' && product.availabilityLabel === 'Зарезервирован') ||
+          (selectedStatus === 'unavailable' && product.availabilityLabel === 'Нет в наличии');
+        return matchesText && matchesCategory && matchesRequestedProduct && matchesStatus;
       });
 
       elements['product-grid'].replaceChildren();
@@ -124,14 +131,20 @@
       elements['results-count'].textContent = 'Найдено товаров: ' + products.length;
 
       if (products.length === 0) {
-        var hasFilters = Boolean(query || selectedCategory);
+        var hasTextOrCategoryFilters = Boolean(query || selectedCategory);
         if (state.requestedProductId) {
           elements['empty-title'].textContent = 'Товар по ссылке не найден';
           elements['empty-message'].textContent = 'Возможно, товар снят с публикации или ссылка устарела. Откройте весь каталог, чтобы продолжить поиск.';
+        } else if (!hasTextOrCategoryFilters && selectedStatus === 'available' && state.products.length > 0) {
+          elements['empty-title'].textContent = 'Сейчас нет товаров в наличии';
+          elements['empty-message'].textContent = 'Выберите «Все статусы», чтобы посмотреть зарезервированные товары и товары без наличия.';
+        } else if (!hasTextOrCategoryFilters && selectedStatus !== 'all' && state.products.length > 0) {
+          elements['empty-title'].textContent = 'Нет товаров с выбранным статусом';
+          elements['empty-message'].textContent = 'Выберите другой статус или покажите все товары.';
         } else {
-          elements['empty-title'].textContent = hasFilters ? 'Ничего не найдено' : 'Пока нет опубликованных товаров';
-          elements['empty-message'].textContent = hasFilters
-            ? 'Попробуйте изменить запрос или выбрать другую категорию.'
+          elements['empty-title'].textContent = hasTextOrCategoryFilters ? 'Ничего не найдено' : 'Пока нет опубликованных товаров';
+          elements['empty-message'].textContent = hasTextOrCategoryFilters
+            ? 'Попробуйте изменить запрос, категорию или статус.'
             : 'Новые товары появятся здесь после публикации продавцом.';
         }
         setVisible(elements['empty-state'], true);
@@ -161,6 +174,7 @@
       var badge = document.createElement('span');
       badge.className = 'status-badge ' + statusClass(product.availabilityLabel);
       badge.textContent = product.availabilityLabel || 'Уточнить наличие';
+      badge.setAttribute('aria-label', 'Статус товара: ' + (product.availabilityLabel || 'уточнить наличие'));
       badgeContainer.appendChild(badge);
       media.appendChild(badgeContainer);
 
@@ -432,6 +446,7 @@
 
     function resetFilters() {
       elements['search-input'].value = '';
+      elements['status-filter'].value = 'available';
       elements['category-filter'].value = '';
       state.requestedProductId = '';
       updateProductViewMode();
