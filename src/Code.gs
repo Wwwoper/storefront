@@ -1,6 +1,9 @@
 /** Serves the public storefront. The endpoint is read-only. */
 function doGet() {
   var template = HtmlService.createTemplateFromFile('Index');
+  // Use the canonical deployed URL for product links. The browser's location
+  // may point to Apps Script's userCodeAppPanel iframe instead of the /exec URL.
+  template.webAppUrl = ScriptApp.getService().getUrl() || '';
   return template.evaluate()
     .setTitle('Моя витрина')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')

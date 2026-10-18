@@ -69,6 +69,10 @@
         <span>Личная витрина · без онлайн-оплаты</span>
       </footer>
     </div>
+    <script>
+      // Render the public /exec URL server-side; don't use the sandbox iframe URL.
+      window.STOREFRONT_WEB_APP_URL = <?!= JSON.stringify(webAppUrl) ?>;
+    </script>
     <?!= include_('Client'); ?>
   </body>
 </html>

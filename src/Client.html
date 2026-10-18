@@ -253,18 +253,22 @@
     }
 
     function makeInquiryMessage(product) {
-      return [
+      var lines = [
         'Здравствуйте! Меня заинтересовал товар:',
         product.title,
         'Код: ' + product.id,
-        'Цена: ' + currencyFormatter.format(Number(product.priceRub)),
-        makeProductUrl(product),
-        'Подскажите, пожалуйста, актуально ли наличие?'
-      ].join('\n');
+        'Цена: ' + currencyFormatter.format(Number(product.priceRub))
+      ];
+      var productUrl = makeProductUrl(product);
+      if (productUrl) lines.push(productUrl);
+      lines.push('Подскажите, пожалуйста, актуально ли наличие?');
+      return lines.join('\n');
     }
 
     function makeProductUrl(product) {
-      var url = new URL(window.location.href);
+      var baseUrl = window.STOREFRONT_WEB_APP_URL;
+      if (!baseUrl) return '';
+      var url = new URL(baseUrl);
       url.hash = product.id;
       return url.toString();
     }
