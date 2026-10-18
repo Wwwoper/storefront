@@ -319,7 +319,7 @@
 
       if (state.settings.sellerTelegramUsername) {
         var telegramUrl = 'https://t.me/' + state.settings.sellerTelegramUsername + '?text=' + encodeURIComponent(message);
-        actions.appendChild(createLinkButton('Telegram', telegramUrl, 'button button-primary'));
+        actions.appendChild(createLinkButton('Написать в TG', telegramUrl, 'button button-primary'));
       }
       if (state.settings.maxEnabled) {
         var maxUrl = 'https://max.ru/:share?text=' + encodeURIComponent(message);
@@ -329,7 +329,6 @@
       var copyHelp = document.createElement('p');
       copyHelp.className = 'copy-help';
       copyHelp.textContent = 'Кнопка копирует готовое сообщение с названием, кодом, ценой и ссылкой на товар. Затем откройте чат с продавцом в Telegram, MAX или другом мессенджере и вставьте текст.';
-      actions.appendChild(copyHelp);
 
       var copyButton = document.createElement('button');
       copyButton.type = 'button';
@@ -339,6 +338,7 @@
         copyInquiry(message, actions);
       });
       actions.appendChild(copyButton);
+      actions.appendChild(copyHelp);
 
       var formUrl = makePrefilledFormUrl(product, productUrl);
       if (formUrl) {
