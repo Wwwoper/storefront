@@ -124,7 +124,7 @@ test('публикует только разрешённые статусы и �
     'ITEM-003', 'ITEM-001', 'ITEM-OTHER', 'ITEM-002'
   ]);
   assert.equal(result.products.find((product) => product.id === 'ITEM-001').photos[0],
-    'https://drive.google.com/thumbnail?id=drive-file_123&sz=w1000');
+    'https://lh3.googleusercontent.com/d/drive-file_123');
   assert.equal(result.products.find((product) => product.id === 'ITEM-002').availabilityLabel, 'Нет в наличии');
   assert.equal(result.products.find((product) => product.id === 'ITEM-003').availabilityLabel, 'Зарезервирован');
   assert.equal(result.products.find((product) => product.id === 'ITEM-OTHER').category, 'Другое');

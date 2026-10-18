@@ -86,7 +86,8 @@ function integerValue_(value) {
 
 /**
  * Accept HTTPS image links only. Drive sharing URLs are normalized to the
- * thumbnail endpoint because /uc?export=view can fail when embedded in an img.
+ * googleusercontent endpoint because Drive's thumbnail endpoint can be blocked
+ * when embedded in an Apps Script HTML-service iframe.
  * The owner must still enable public viewing and verify it in a logged-out browser.
  */
 function publicImageUrl_(value) {
@@ -104,7 +105,7 @@ function publicImageUrl_(value) {
     if (!fileId) {
       return '';
     }
-    return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w1000';
+    return 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(fileId);
   }
   return input;
 }
