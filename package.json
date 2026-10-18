@@ -1,0 +1,13 @@
+{
+  "name": "personal-storefront",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Личная публичная витрина товаров на Google Apps Script и Google Sheets",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check tests/catalog.test.mjs && node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light">
+    <title>Моя витрина</title>
+    <?!= include_('Styles'); ?>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="header-copy">
+          <p class="eyebrow">Личная витрина</p>
+          <h1 id="store-title">Мои вещи</h1>
+          <p id="store-description" class="store-description">Каталог вещей, которые ищут новых владельцев.</p>
+        </div>
+      </header>
+
+      <main id="main-content">
+        <section class="catalog-tools" aria-label="Поиск товаров">
+          <label class="search-field" for="search-input">
+            <span class="visually-hidden">Поиск по названию и описанию</span>
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="search-input" type="search" placeholder="Найти товар…" autocomplete="off">
+          </label>
+          <label class="category-field" for="category-filter">
+            <span class="visually-hidden">Категория товара</span>
+            <select id="category-filter">
+              <option value="">Все категории</option>
+            </select>
+          </label>
+          <button id="reset-filters" class="button button-quiet" type="button">Сбросить</button>
+        </section>
+
+        <div class="results-line">
+          <p id="results-count" class="results-count" aria-live="polite">Загружаем каталог…</p>
+          <p id="updated-at" class="updated-at"></p>
+        </div>
+
+        <section id="loading-state" class="state-panel" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Загружаем товары…</p>
+        </section>
+        <section id="error-state" class="state-panel state-error" role="alert" hidden>
+          <h2>Каталог пока недоступен</h2>
+          <p id="error-message">Не удалось загрузить товары.</p>
+          <button id="retry-button" class="button button-primary" type="button">Попробовать ещё раз</button>
+        </section>
+        <section id="empty-state" class="state-panel" hidden>
+          <h2 id="empty-title">Товары не найдены</h2>
+          <p id="empty-message">Измените запрос или сбросьте фильтры.</p>
+          <button id="empty-reset-button" class="button button-quiet" type="button">Сбросить фильтры</button>
+        </section>
+        <section id="product-grid" class="product-grid" aria-label="Каталог товаров" hidden></section>
+
+        <section class="contact-note" aria-label="Информация о продаже">
+          <span class="contact-note-icon" aria-hidden="true">i</span>
+          <div>
+            <h2>Как договориться о покупке</h2>
+            <p>Наличие и способ передачи товара подтверждаются продавцом в переписке. Отправка заявки не означает бронирование или оформление заказа.</p>
+            <p id="seller-contact-note" class="secondary-note" hidden></p>
+            <p id="delivery-note" class="secondary-note" hidden></p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Личная витрина · без онлайн-оплаты</span>
+      </footer>
+    </div>
+    <?!= include_('Client'); ?>
+  </body>
+</html>
