@@ -85,9 +85,9 @@ function integerValue_(value) {
 }
 
 /**
- * Accept HTTPS image links only. Drive sharing URLs are normalized to a URL
- * that is suitable for use as an img src; the owner must still enable public
- * viewing and verify it in a logged-out browser.
+ * Accept HTTPS image links only. Drive sharing URLs are normalized to the
+ * thumbnail endpoint because /uc?export=view can fail when embedded in an img.
+ * The owner must still enable public viewing and verify it in a logged-out browser.
  */
 function publicImageUrl_(value) {
   var input = cellText_(value);
@@ -104,7 +104,7 @@ function publicImageUrl_(value) {
     if (!fileId) {
       return '';
     }
-    return 'https://drive.google.com/uc?export=view&id=' + encodeURIComponent(fileId);
+    return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w1000';
   }
   return input;
 }
