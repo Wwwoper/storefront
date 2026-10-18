@@ -487,3 +487,102 @@
     .product-card:hover { transform: none; }
   }
 </style>
+
+<style>
+/* Editorial card details: status chips below the photo and coordinated messenger actions. */
+  .product-status-row {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 16px 22px 0;
+  }
+  .product-status-row .status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 7px 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    box-shadow: none;
+    font-size: 11px;
+    font-weight: 760;
+    letter-spacing: .005em;
+    line-height: 1.1;
+  }
+  .product-status-row .status-badge::before {
+    flex-basis: 6px;
+    width: 6px;
+    height: 6px;
+    margin-right: 7px;
+  }
+  .product-status-row .status-available {
+    border-color: #d7e6d4;
+    color: #28533b;
+    background: #e5efe5;
+  }
+  .product-status-row .status-reserved {
+    border-color: #efdfb6;
+    color: #815d20;
+    background: #fbf0d9;
+  }
+  .product-status-row .status-unavailable {
+    border-color: #e4e1dc;
+    color: #656a63;
+    background: #eeece8;
+  }
+  .product-body { padding-top: 13px; }
+
+  .product-actions .button-contact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 13px 16px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 740;
+    letter-spacing: -.01em;
+    line-height: 1.25;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgb(38 59 48 / 12%);
+    transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+  .product-actions .button-telegram {
+    border-color: #086f9f;
+    color: #fff;
+    background: #086f9f;
+    box-shadow: 0 4px 12px rgb(8 111 159 / 16%);
+  }
+  .product-actions .button-telegram:hover {
+    border-color: #075c85;
+    background: #075c85;
+    box-shadow: 0 6px 16px rgb(8 111 159 / 22%);
+  }
+  .product-actions .button-max {
+    border-color: #471aff;
+    color: #fff;
+    background: #471aff;
+    box-shadow: 0 4px 12px rgb(71 26 255 / 16%);
+  }
+  .product-actions .button-max:hover {
+    border-color: #3810d9;
+    background: #3810d9;
+    box-shadow: 0 6px 16px rgb(71 26 255 / 22%);
+  }
+  .product-actions .button-contact:focus-visible {
+    outline: 3px solid #9ab8c7;
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 700px) {
+    .product-status-row { min-height: 38px; padding: 14px 19px 0; }
+    .product-body { padding-top: 12px; }
+    .product-actions .button-contact { min-height: 49px; font-size: 14px; }
+  }
+  @media (max-width: 380px) {
+    .product-status-row { padding-right: 16px; padding-left: 16px; }
+  }
+</style>

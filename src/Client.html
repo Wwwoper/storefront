@@ -170,13 +170,12 @@
       if (photoUrls.length) createProductGallery(media, photoUrls, product.title);
 
       var badgeContainer = document.createElement('div');
-      badgeContainer.className = 'product-badges';
+      badgeContainer.className = 'product-status-row';
       var badge = document.createElement('span');
       badge.className = 'status-badge ' + statusClass(product.availabilityLabel);
       badge.textContent = product.availabilityLabel || 'Уточнить наличие';
       badge.setAttribute('aria-label', 'Статус товара: ' + (product.availabilityLabel || 'уточнить наличие'));
       badgeContainer.appendChild(badge);
-      media.appendChild(badgeContainer);
 
       var body = document.createElement('div');
       body.className = 'product-body';
@@ -199,6 +198,7 @@
       appendText(body, 'p', 'product-price', currencyFormatter.format(Number(product.priceRub)));
       body.appendChild(createProductActions(product));
       card.appendChild(media);
+      card.appendChild(badgeContainer);
       card.appendChild(body);
       return card;
     }
@@ -333,11 +333,11 @@
 
       if (state.settings.sellerTelegramUsername) {
         var telegramUrl = 'https://t.me/' + state.settings.sellerTelegramUsername + '?text=' + encodeURIComponent(message);
-        actions.appendChild(createLinkButton('Написать в TG', telegramUrl, 'button button-primary'));
+        actions.appendChild(createLinkButton('Написать в TG', telegramUrl, 'button button-primary button-contact button-telegram'));
       }
       if (state.settings.maxEnabled) {
         var maxUrl = 'https://max.ru/:share?text=' + encodeURIComponent(message);
-        actions.appendChild(createLinkButton('Отправить запрос через MAX', maxUrl, 'button button-secondary'));
+        actions.appendChild(createLinkButton('Написать в MAX', maxUrl, 'button button-secondary button-contact button-max'));
       }
 
       var copyHelp = document.createElement('p');
