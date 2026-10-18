@@ -151,22 +151,10 @@
       var media = document.createElement('div');
       media.className = 'product-media';
       media.classList.add('is-placeholder');
-      var photoUrl = Array.isArray(product.photos) ? product.photos[0] : '';
-      if (photoUrl) {
-        var image = document.createElement('img');
-        image.src = photoUrl;
-        image.alt = product.title ? 'Фотография товара: ' + product.title : 'Фотография товара';
-        image.loading = 'lazy';
-        image.decoding = 'async';
-        image.addEventListener('load', function () {
-          media.classList.remove('is-placeholder');
-        });
-        image.addEventListener('error', function () {
-          image.remove();
-          media.classList.add('is-placeholder');
-        });
-        media.appendChild(image);
-      }
+      var photoUrls = Array.isArray(product.photos)
+        ? product.photos.filter(function (url) { return typeof url === 'string' && url.trim(); }).map(function (url) { return url.trim(); }).slice(0, 3)
+        : [];
+      if (photoUrls.length) createProductGallery(media, photoUrls, product.title);
 
       var badgeContainer = document.createElement('div');
       badgeContainer.className = 'product-badges';
@@ -199,6 +187,114 @@
       card.appendChild(media);
       card.appendChild(body);
       return card;
+    }
+
+    function createProductGallery(media, photos, productTitle) {
+      var photoUrls = photos.slice(0, 3);
+      var currentIndex = 0;
+      var activePhotoUrl = '';
+      var image = document.createElement('img');
+      image.className = 'product-gallery-main-image';
+      image.loading = 'lazy';
+      image.decoding = 'async';
+
+      var controls = document.createElement('div');
+      controls.className = 'product-gallery-controls';
+
+      var previousButton = document.createElement('button');
+      previousButton.type = 'button';
+      previousButton.className = 'product-gallery-arrow product-gallery-previous';
+      previousButton.setAttribute('aria-label', 'Предыдущая фотография');
+      previousButton.textContent = '‹';
+
+      var nextButton = document.createElement('button');
+      nextButton.type = 'button';
+      nextButton.className = 'product-gallery-arrow product-gallery-next';
+      nextButton.setAttribute('aria-label', 'Следующая фотография');
+      nextButton.textContent = '›';
+
+      var thumbnails = document.createElement('div');
+      thumbnails.className = 'product-gallery-thumbnails';
+      thumbnails.setAttribute('aria-label', 'Миниатюры фотографий товара');
+
+      image.addEventListener('load', function () {
+        media.classList.remove('is-placeholder');
+      });
+
+      image.addEventListener('error', function () {
+        var failedIndex = photoUrls.indexOf(activePhotoUrl);
+        if (failedIndex < 0) return;
+
+        photoUrls.splice(failedIndex, 1);
+        if (!photoUrls.length) {
+          image.style.display = 'none';
+          media.classList.add('is-placeholder');
+          updateControls();
+          return;
+        }
+
+        if (failedIndex < currentIndex) currentIndex -= 1;
+        if (currentIndex >= photoUrls.length) currentIndex = 0;
+        setActivePhoto(currentIndex);
+      });
+
+      previousButton.addEventListener('click', function () {
+        setActivePhoto(currentIndex - 1);
+      });
+      nextButton.addEventListener('click', function () {
+        setActivePhoto(currentIndex + 1);
+      });
+
+      controls.appendChild(previousButton);
+      controls.appendChild(nextButton);
+      controls.appendChild(thumbnails);
+      media.appendChild(image);
+      media.appendChild(controls);
+
+      function updateControls() {
+        var hasMultiplePhotos = photoUrls.length > 1;
+        previousButton.hidden = !hasMultiplePhotos;
+        nextButton.hidden = !hasMultiplePhotos;
+        thumbnails.hidden = !hasMultiplePhotos;
+        thumbnails.replaceChildren();
+
+        if (!hasMultiplePhotos) return;
+
+        photoUrls.forEach(function (photoUrl, index) {
+          var thumbnailButton = document.createElement('button');
+          thumbnailButton.type = 'button';
+          thumbnailButton.className = 'product-gallery-thumbnail';
+          thumbnailButton.setAttribute('aria-label', 'Показать фотографию ' + (index + 1));
+          thumbnailButton.setAttribute('aria-pressed', String(index === currentIndex));
+          if (index === currentIndex) thumbnailButton.classList.add('is-active');
+
+          var thumbnailImage = document.createElement('img');
+          thumbnailImage.src = photoUrl;
+          thumbnailImage.alt = '';
+          thumbnailImage.loading = 'lazy';
+          thumbnailImage.decoding = 'async';
+          thumbnailButton.appendChild(thumbnailImage);
+          thumbnailButton.addEventListener('click', function () {
+            setActivePhoto(index);
+          });
+          thumbnails.appendChild(thumbnailButton);
+        });
+      }
+
+      function setActivePhoto(index) {
+        if (!photoUrls.length) return;
+        currentIndex = ((index % photoUrls.length) + photoUrls.length) % photoUrls.length;
+        activePhotoUrl = photoUrls[currentIndex];
+        image.style.display = '';
+        image.alt = productTitle
+          ? 'Фотография ' + (currentIndex + 1) + ' из ' + photoUrls.length + ' товара: ' + productTitle
+          : 'Фотография ' + (currentIndex + 1) + ' из ' + photoUrls.length;
+        media.classList.add('is-placeholder');
+        image.src = activePhotoUrl;
+        updateControls();
+      }
+
+      setActivePhoto(0);
     }
 
     function appendText(parent, tagName, className, value) {
