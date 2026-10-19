@@ -153,6 +153,18 @@ function readPublishedProducts_(spreadsheet, sheetName, allowedCategories) {
   var errors = [];
   rows.forEach(function (row, rowOffset) {
     var sheetRow = rowOffset + 2;
+    var rawProductId = cellText_(valueFromRow_(row, indexes, 'product_id'));
+    var rawTitle = cellText_(valueFromRow_(row, indexes, 'title'));
+    var rawDescription = cellText_(valueFromRow_(row, indexes, 'description'));
+    // DEMO- is a reserved ID prefix. Also recognize the explicit labels used
+    // by the pilot sample rows if someone has already edited their IDs/statuses.
+    var isDemoProduct = /^DEMO-/i.test(rawProductId) ||
+      /^ПРИМЕР\s*[—–-]/i.test(rawTitle) ||
+      /^Демонстрационная строка(?:$|[\s:,.])/i.test(rawDescription);
+    if (isDemoProduct) {
+      return;
+    }
+
     var rawStatus = cellText_(valueFromRow_(row, indexes, 'status'));
     if (HIDDEN_PRODUCT_STATUSES_.indexOf(rawStatus) !== -1 || !rawStatus) {
       return;

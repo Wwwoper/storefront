@@ -39,3 +39,15 @@ test('uses visible focus styles and respects reduced-motion preference', () => {
   assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(modernDesign, /\.product-card:hover\s*\{\s*transform:\s*none/);
 });
+
+
+test('compact phones stack search, status and category controls to prevent cramped labels', () => {
+  assert.match(modernDesign, /@media\s*\(max-width:\s*420px\)[\s\S]*?\.catalog-tools\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(modernDesign, /@media\s*\(max-width:\s*420px\)[\s\S]*?\.status-field select,\s*\.category-field select\s*\{[^}]*font-size:\s*13px/);
+});
+
+test('description, characteristics and copy hint use readable text sizing', () => {
+  assert.match(modernDesign, /\.product-description\s*\{[^}]*font-size:\s*14px/);
+  assert.match(modernDesign, /\.product-meta\s*\{[^}]*font-size:\s*13px/);
+  assert.match(modernDesign, /\.copy-help\s*\{[^}]*font-size:\s*12px/);
+});

@@ -133,6 +133,19 @@ test('публикует только разрешённые статусы и �
   assert.ok(result.categories.includes('Другое'));
 });
 
+test('не публикует демонстрационные товары с зарезервированным префиксом DEMO-', async () => {
+  const productRows = [
+    row({ id: 'DEMO-CLOTH-001', title: 'ПРИМЕР — одежда', status: 'В наличии' }),
+    row({ id: 'demo-home-001', title: 'ПРИМЕР — вещь для дома', status: 'Зарезервирован' }),
+    row({ id: 'ITEM-EXAMPLE-001', title: 'ПРИМЕР — другая одежда', status: 'В наличии' }),
+    row({ id: 'ITEM-EXAMPLE-002', title: 'Другой товар', description: 'Демонстрационная строка: заменить позже', status: 'В наличии' }),
+    row({ id: 'ITEM-REAL-001', title: 'Реальный товар', status: 'В наличии' })
+  ];
+  const { runtime } = await makeFixture({ productRows });
+  const result = jsonSafe(runtime.getStorefrontData());
+  assert.deepEqual(result.products.map((product) => product.id), ['ITEM-REAL-001']);
+});
+
 test('публичная конфигурация содержит только разрешённые настройки', async () => {
   const { runtime } = await makeFixture({
     settingRows: [['private_api_key', 'must-not-leak']]
