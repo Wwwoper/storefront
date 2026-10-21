@@ -23,7 +23,13 @@ var DEFAULT_SETTINGS_ = [
   ['google_form_url', ''],
   ['google_form_product_id_entry', ''],
   ['google_form_product_url_entry', ''],
-  ['delivery_note', '']
+  ['delivery_note', ''],
+  ['community_section_title', 'Мы также здесь'],
+  ['community_telegram_url', ''],
+  ['community_max_url', ''],
+  ['community_vk_url', ''],
+  ['community_extra_label', 'Дополнительный источник'],
+  ['community_extra_url', '']
 ];
 
 /**
@@ -44,6 +50,7 @@ function setupCatalogTemplate() {
 
   setupSeedSheetIfEmpty_(reference, [['Категория']].concat(DEFAULT_CATEGORIES_));
   setupSeedSheetIfEmpty_(settings, [['key', 'value']].concat(DEFAULT_SETTINGS_));
+  setupAppendMissingSettings_(settings, DEFAULT_SETTINGS_);
   setupConfigureSheet_(products, PRODUCT_HEADERS_.length);
   setupConfigureSheet_(reference, 1);
   setupConfigureSheet_(settings, 2);
@@ -73,6 +80,29 @@ function setupSeedSheetIfEmpty_(sheet, rows) {
   if (sheet.getLastRow() <= 1) {
     sheet.clearContents();
     sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  }
+}
+
+/** Add missing default keys without changing values already maintained by the editor. */
+function setupAppendMissingSettings_(sheet, defaultSettings) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 1 || !defaultSettings || !defaultSettings.length) return;
+
+  var rows = sheet.getRange(1, 1, lastRow, 2).getValues();
+  var existingKeys = Object.create(null);
+  rows.slice(1).forEach(function (row) {
+    var key = setupCellText_(row[0]);
+    if (key) existingKeys[key] = true;
+  });
+
+  var missing = defaultSettings.filter(function (setting) {
+    var key = setupCellText_(setting[0]);
+    if (!key || existingKeys[key]) return false;
+    existingKeys[key] = true;
+    return true;
+  });
+  if (missing.length) {
+    sheet.getRange(lastRow + 1, 1, missing.length, 2).setValues(missing);
   }
 }
 

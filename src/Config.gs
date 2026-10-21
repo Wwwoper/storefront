@@ -31,7 +31,9 @@ function settingIsEnabled_(value) {
 /** Accept only HTTPS URLs for public links. */
 function safeHttpsUrl_(value) {
   var url = cellText_(value);
-  if (!/^https:\/\/[^\s]+$/i.test(url)) {
+  // Require a hostname and reject whitespace, credentials, and non-HTTPS schemes.
+  // The URL is later assigned to an anchor's href property, never interpolated into HTML.
+  if (!/^https:\/\/[A-Z0-9](?:[A-Z0-9.-]*[A-Z0-9])?(?::\d{1,5})?(?:[/?#][^\s]*)?$/i.test(url)) {
     return '';
   }
   return url;
@@ -77,6 +79,27 @@ function makePublicSettings_(rows) {
     productUrlEntry = '';
   }
 
+  var communityLinks = [];
+  [
+    { key: 'community_telegram_url', label: 'Telegram' },
+    { key: 'community_max_url', label: 'MAX' },
+    { key: 'community_vk_url', label: 'ВКонтакте' }
+  ].forEach(function (definition) {
+    var url = safeHttpsUrl_(values[definition.key]);
+    if (url) {
+      communityLinks.push({ label: definition.label, url: url });
+    }
+  });
+
+  var extraCommunityUrl = safeHttpsUrl_(values.community_extra_url);
+  if (extraCommunityUrl) {
+    var extraCommunityLabel = cellText_(values.community_extra_label).slice(0, 60);
+    communityLinks.push({
+      label: extraCommunityLabel || 'Дополнительный источник',
+      url: extraCommunityUrl
+    });
+  }
+
   return {
     storeTitle: cellText_(values.store_title) || 'Мои вещи',
     storeDescription: cellText_(values.store_description),
@@ -86,6 +109,8 @@ function makePublicSettings_(rows) {
     googleFormUrl: formUrl,
     googleFormProductIdEntry: productIdEntry,
     googleFormProductUrlEntry: productUrlEntry,
-    deliveryNote: cellText_(values.delivery_note)
+    deliveryNote: cellText_(values.delivery_note),
+    communitySectionTitle: cellText_(values.community_section_title).slice(0, 80) || 'Мы также здесь',
+    communityLinks: communityLinks
   };
 }

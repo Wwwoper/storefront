@@ -161,6 +161,46 @@ test('публичная конфигурация содержит только 
   assert.equal(JSON.stringify(result).includes('must-not-leak'), false);
 });
 
+test('публикует настроенные ссылки на сообщества и дополнительный источник', async () => {
+  const { runtime } = await makeFixture({
+    settingRows: [
+      ['community_section_title', 'Наши страницы'],
+      ['community_telegram_url', 'https://t.me/storefront_example'],
+      ['community_max_url', 'https://max.ru/storefront_example'],
+      ['community_vk_url', 'https://vk.com/storefront_example'],
+      ['community_extra_label', 'Наш сайт'],
+      ['community_extra_url', 'https://example.com/source'],
+      ['internal_note', 'must-not-leak']
+    ]
+  });
+  const result = jsonSafe(runtime.getStorefrontData());
+
+  assert.equal(result.settings.communitySectionTitle, 'Наши страницы');
+  assert.deepEqual(result.settings.communityLinks, [
+    { label: 'Telegram', url: 'https://t.me/storefront_example' },
+    { label: 'MAX', url: 'https://max.ru/storefront_example' },
+    { label: 'ВКонтакте', url: 'https://vk.com/storefront_example' },
+    { label: 'Наш сайт', url: 'https://example.com/source' }
+  ]);
+  assert.equal(JSON.stringify(result).includes('must-not-leak'), false);
+});
+
+test('игнорирует небезопасные и некорректные ссылки на сообщества', async () => {
+  const { runtime } = await makeFixture({
+    settingRows: [
+      ['community_telegram_url', 'javascript:alert(1)'],
+      ['community_max_url', 'http://max.ru/storefront_example'],
+      ['community_vk_url', 'https://'],
+      ['community_extra_url', 'https://example.com/bad link'],
+      ['community_extra_label', 'Мой источник']
+    ]
+  });
+  const result = jsonSafe(runtime.getStorefrontData());
+
+  assert.deepEqual(result.settings.communityLinks, []);
+  assert.equal(result.settings.communitySectionTitle, 'Мы также здесь');
+});
+
 test('некорректные контакты и форма отключаются', async () => {
   const { runtime } = await makeFixture({
     settingRows: [

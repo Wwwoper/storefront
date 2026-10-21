@@ -24,7 +24,8 @@
         'results-count', 'updated-at', 'loading-state',
         'error-state', 'error-message', 'retry-button', 'empty-state',
         'empty-title', 'empty-message', 'empty-reset-button', 'product-grid',
-        'seller-contact-note', 'delivery-note'
+        'seller-contact-note', 'delivery-note', 'community-links',
+        'community-links-title', 'community-links-list'
       ].forEach(function (id) {
         elements[id] = document.getElementById(id);
       });
@@ -85,6 +86,37 @@
 
       setOptionalNote(elements['seller-contact-note'], settings.sellerContactNote);
       setOptionalNote(elements['delivery-note'], settings.deliveryNote);
+      renderCommunityLinks(settings);
+    }
+
+    function renderCommunityLinks(settings) {
+      var section = elements['community-links'];
+      var title = elements['community-links-title'];
+      var list = elements['community-links-list'];
+      while (list.firstChild) {
+        list.removeChild(list.firstChild);
+      }
+
+      var links = Array.isArray(settings.communityLinks) ? settings.communityLinks : [];
+      links.forEach(function (link) {
+        var url = String(link && link.url || '').trim();
+        var label = String(link && link.label || '').trim();
+        // Defense in depth: only safe HTTPS URLs and non-empty labels become links.
+        if (!/^https:\/\/[A-Z0-9](?:[A-Z0-9.-]*[A-Z0-9])?(?::\d{1,5})?(?:[/?#][^\s]*)?$/i.test(url) || !label) {
+          return;
+        }
+
+        var anchor = document.createElement('a');
+        anchor.className = 'community-link';
+        anchor.href = url;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        anchor.textContent = label;
+        list.appendChild(anchor);
+      });
+
+      title.textContent = String(settings.communitySectionTitle || 'Мы также здесь').trim();
+      setVisible(section, list.childNodes.length > 0);
     }
 
     function setOptionalNote(element, value) {
